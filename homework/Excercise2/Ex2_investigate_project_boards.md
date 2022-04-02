@@ -44,9 +44,11 @@ anywhere? (Try Digikey, Mouser, Octopart, Google, and so on.)
 - How much does the board cost vs what the processor costs? Is the processor in stock
 anywhere? (Try Digikey, Mouser, Octopart, Google, and so on.)
   - board (pyruler)
-  ![MCU cost](pyruler_price.jpg "pyRuler price") 
+  
+     ![MCU cost](pyruler_price.jpg "pyRuler price") 
   - board (trinket m0 eval board)
-  ![MCU cost](trinketM0_price.jpg "trinket M0 price") 
+ 
+     ![MCU cost](trinketM0_price.jpg "trinket M0 price") 
   - processor (ATSAMD21E18)
    
      ![MCU cost](ATSAMD21E18_price.jpg "STM32F429ZIT6 price") 
