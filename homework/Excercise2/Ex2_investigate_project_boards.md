@@ -17,9 +17,11 @@ No ADC mentioned in evaluation board documentation, however for the microcontrol
 - How much does the board cost vs what the processor costs? Is the processor in stock
 anywhere? (Try Digikey, Mouser, Octopart, Google, and so on.)
   - processor
-  ![MCU cost](stm32f4zit6_prices.jpg "STM32F429ZIT6 price") 
+  
+    ![MCU cost](stm32f4zit6_prices.jpg "STM32F429ZIT6 price") 
   - board
-  ![MCU cost](stm32f429disco_price.jpg "STM32F429ZIT6 price") 
+  
+    ![MCU cost](stm32f429disco_price.jpg "STM32F429ZIT6 price") 
 ## pyRuler
 ### Hardware block diagram
 ![hardware block diagram](pyRuler_hw_diagram.drawio.png "pyRuler board, hw block diagram.").
