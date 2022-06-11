@@ -122,15 +122,14 @@ int main(void)
   {
 	  if (radio_start_tx_flag == FLAG_SET)
 	  {
-		  uint8_t* ts_coordinates = getCoordinates();
-		  UART_SendInt(ts_coordinates[TS_COORDINATE_X]);
-		  UART_SendStr("\r\n");
-//		  radio_Process(0, 0);
+		  int16_t ts_coordinates[2];
+		  getCoordinates(ts_coordinates);
+		  radio_Process_Tx( (uint8_t*) ts_coordinates, 4);
 		  radio_start_tx_flag = FLAG_RESET;
 	  }
 	  else
 	  {
-		  /*do nothing*/
+		  /*do nothing*/;
 	  }
     /* USER CODE END WHILE */
 

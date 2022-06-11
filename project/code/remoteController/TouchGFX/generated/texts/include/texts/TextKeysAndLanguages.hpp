@@ -6,13 +6,11 @@
 
 enum LANGUAGES
 {
-    GB,
     NUMBER_OF_LANGUAGES
 };
 
 enum TEXTS
 {
-    T___SINGLEUSE_F2CH,
     NUMBER_OF_TEXT_KEYS
 };
 

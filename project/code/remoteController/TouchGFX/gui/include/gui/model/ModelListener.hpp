@@ -16,9 +16,9 @@ public:
     virtual ~ModelListener() {}
 
     /**
-	 * Call this function to get the values of touch screen coordinates (X, Y) inside motorControlArea
+	 * Call this function to get the values of touch screen coordinates (X, Y) inside motorControlArea::Circle
 	 */
-	virtual uint8_t* getTouchScreenCoordinates() {return 0;}
+    virtual bool getCircleXY(int32_t& x, int32_t& y) {return 0;}
 
     void bind(Model* m)
     {

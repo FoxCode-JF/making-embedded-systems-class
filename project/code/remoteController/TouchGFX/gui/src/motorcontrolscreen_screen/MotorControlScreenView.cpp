@@ -20,15 +20,66 @@ void MotorControlScreenView::tearDownScreen()
     MotorControlScreenViewBase::tearDownScreen();
 }
 
-uint8_t MotorControlScreenView::getCircleX()
+bool MotorControlScreenView::getCircleXY(int32_t& x, int32_t& y)
 {
-	return (uint8_t)motorControlArea.getX();
-}
+	int32_t radius, circle_centerX, circle_centerY;
 
-uint8_t MotorControlScreenView::getCircleY()
-{
-	int32_t r, x, y;
-//	touchgfx::TouchController::sampleTouch(x, y);
-	motorControlArea.getRadius(r);
-	return (uint8_t)motorControlArea.getY();
+	bool circleTouchDetected = this->sampleTouch(x, y);
+
+	motorControlArea.getRadius(radius);
+	motorControlArea.getCenter(circle_centerX, circle_centerY);
+
+	/*check if touch is inside a ciecle*/
+	if (true == circleTouchDetected)
+	{
+		/*Move coordinate system to center of the circle*/
+		x = x - circle_centerX;
+		y = y - circle_centerY;
+
+		int16_t radiusSquared = radius*radius;
+
+		if ((x*x + y*y) > radiusSquared)
+		{
+			/*Stop if touch is detected outside of the circle*/
+			x = 0;
+			y = 0;
+//			if (x > 0)
+//			{
+//				if (x > radius)
+//				{
+//					x = radius;
+//				}
+//			}
+//			else
+//			{
+//				if (abs(x) > radius)
+//				{
+//					x = radius;
+//				}
+//			}
+//
+//			if (y > 0)
+//			{
+//				if (y > radius)
+//				{
+//					y = radius;
+//				}
+//			}
+//			else
+//			{
+//				if (abs(y) > radius)
+//				{
+//					y = (-radius);
+//				}
+//			}
+		}
+	} else
+	{
+		/*not touch detected --> STOP!*/
+		x = 0;
+		y = 0;
+	}
+
+
+	return circleTouchDetected;
 }

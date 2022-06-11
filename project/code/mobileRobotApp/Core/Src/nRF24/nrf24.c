@@ -533,11 +533,13 @@ void nRF24_IRQ_Read(void)
 {
 	if(nrf24_interrupt_flag == 1)
 	{
+
 		uint8_t status = nRF24_GetStatus();
 		uint8_t ClearIrq = 0;
 		// RX FIFO Interrupt
 		if ((status & nRF24_FLAG_RX_DR))
 		{
+			nrf24_interrupt_flag = 0;
 			nrf24_rx_flag = 1;
 			ClearIrq |= nRF24_FLAG_RX_DR; // Interrupt flag clear
 
@@ -545,12 +547,14 @@ void nRF24_IRQ_Read(void)
 		// TX Data Sent interrupt
 		if ((status & nRF24_FLAG_TX_DS))
 		{
+			nrf24_interrupt_flag = 0;
 			nrf24_tx_flag = 1;
 			ClearIrq |= nRF24_FLAG_TX_DS; // Interrupt flag clear
 		}
 		// Max Retransmits interrupt
 		if ((status & nRF24_FLAG_TX_DS))
 		{
+			nrf24_interrupt_flag = 0;
 			nrf24_mr_flag = 1;
 			ClearIrq |= nRF24_FLAG_TX_DS; // Interrupt flag clear
 		}

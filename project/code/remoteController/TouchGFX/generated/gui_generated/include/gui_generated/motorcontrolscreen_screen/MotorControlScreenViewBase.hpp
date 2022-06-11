@@ -8,9 +8,9 @@
 #include <mvp/View.hpp>
 #include <gui/motorcontrolscreen_screen/MotorControlScreenPresenter.hpp>
 #include <touchgfx/widgets/Box.hpp>
-#include <touchgfx/widgets/ButtonWithLabel.hpp>
 #include <touchgfx/widgets/canvas/Circle.hpp>
 #include <touchgfx/widgets/canvas/PainterRGB565.hpp>
+#include <touchgfx/widgets/ToggleButton.hpp>
 
 class MotorControlScreenViewBase : public touchgfx::View<MotorControlScreenPresenter>
 {
@@ -28,21 +28,11 @@ protected:
      * Member Declarations
      */
     touchgfx::Box __background;
-    touchgfx::ButtonWithLabel pointlessButton;
     touchgfx::Circle motorControlArea;
     touchgfx::PainterRGB565 motorControlAreaPainter;
+    touchgfx::ToggleButton motorStartStop;
 
 private:
-
-    /*
-     * Callback Declarations
-     */
-    touchgfx::Callback<MotorControlScreenViewBase, const touchgfx::AbstractButton&> buttonCallback;
-
-    /*
-     * Callback Handler Declarations
-     */
-    void buttonCallbackHandler(const touchgfx::AbstractButton& src);
 
     /*
      * Canvas Buffer Size

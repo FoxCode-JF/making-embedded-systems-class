@@ -4,25 +4,16 @@
 #include <gui_generated/motorcontrolscreen_screen/MotorControlScreenViewBase.hpp>
 #include <touchgfx/Color.hpp>
 #include <BitmapDatabase.hpp>
-#include <texts/TextKeysAndLanguages.hpp>
 #include <touchgfx/canvas_widget_renderer/CanvasWidgetRenderer.hpp>
 
 
-MotorControlScreenViewBase::MotorControlScreenViewBase() :
-    buttonCallback(this, &MotorControlScreenViewBase::buttonCallbackHandler)
+MotorControlScreenViewBase::MotorControlScreenViewBase()
 {
 
     touchgfx::CanvasWidgetRenderer::setupBuffer(canvasBuffer, CANVAS_BUFFER_SIZE);
 
     __background.setPosition(0, 0, 240, 320);
     __background.setColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
-
-    pointlessButton.setXY(35, 260);
-    pointlessButton.setBitmaps(touchgfx::Bitmap(BITMAP_BLUE_BUTTONS_ROUND_EDGE_SMALL_ID), touchgfx::Bitmap(BITMAP_BLUE_BUTTONS_ROUND_EDGE_SMALL_PRESSED_ID));
-    pointlessButton.setLabelText(touchgfx::TypedText(T___SINGLEUSE_F2CH));
-    pointlessButton.setLabelColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
-    pointlessButton.setLabelColorPressed(touchgfx::Color::getColorFromRGB(255, 255, 255));
-    pointlessButton.setAction(buttonCallback);
 
     motorControlArea.setPosition(0, 0, 240, 260);
     motorControlArea.setCenter(120, 130);
@@ -32,25 +23,15 @@ MotorControlScreenViewBase::MotorControlScreenViewBase() :
     motorControlAreaPainter.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
     motorControlArea.setPainter(motorControlAreaPainter);
 
+    motorStartStop.setXY(56, 267);
+    motorStartStop.setBitmaps(touchgfx::Bitmap(BITMAP_BLUE_TOGGLEBARS_TOGGLE_ROUND_LARGE_BUTTON_OFF_ID), touchgfx::Bitmap(BITMAP_BLUE_TOGGLEBARS_TOGGLE_ROUND_LARGE_BUTTON_ON_ID));
+
     add(__background);
-    add(pointlessButton);
     add(motorControlArea);
+    add(motorStartStop);
 }
 
 void MotorControlScreenViewBase::setupScreen()
 {
 
-}
-
-void MotorControlScreenViewBase::buttonCallbackHandler(const touchgfx::AbstractButton& src)
-{
-    if (&src == &pointlessButton)
-    {
-        //Interaction1
-        //When pointlessButton clicked change label colors of pointlessButton
-        //Set label colors on pointlessButton. Released color - R:176, G:51, B:51, Pressed color - R:69, G:173, B:43
-        pointlessButton.setLabelColor(touchgfx::Color::getColorFromRGB(176,51,51));
-        pointlessButton.setLabelColorPressed(touchgfx::Color::getColorFromRGB(69,173,43));
-        pointlessButton.invalidate();
-    }
 }

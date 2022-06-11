@@ -27,7 +27,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "stdio.h"
-#include "nRF24.h"
+//#include "nRF24.h"
+#include "radio_controller.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -54,14 +55,15 @@ volatile uint16_t pulseCount_left_encoder;
 volatile uint8_t nrf24_rx_flag;
 volatile uint8_t nrf24_tx_flag;
 volatile uint8_t nrf24_mr_flag;
-uint8_t Message[32];
-uint8_t MessageLength;
+volatile uint8_t nrf24_interrupt_flag;
+//uint8_t Message[32];
+//uint8_t MessageLength;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-
+void runRadio(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -104,17 +106,19 @@ int main(void)
   MX_TIM3_Init();
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
-//  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start_DMA(&htim2, TIM_CHANNEL_1, &dutyCycle_pwm, 1);
   HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_ALL);
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL);
+  radio_Init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+//  runRadio();
   while (1)
   {
-
+	  nRF24_Event();
 
 //	  static uint8_t InterruptPrescaler = 0; // licznik przerwan
 //	  	static uint8_t CzyRosnie = 1; // Flaga kierunku zliczania
@@ -193,7 +197,19 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	if (GPIO_Pin == NRF_IRQ_Pin)
+	{
+		nRF24_IRQ_Handler();
+//		nrf24_interrupt_flag = 0;
+	}
+}
 
+void nRF24_EventRxCallback(void)
+{
+	radio_Process_Rx();
+}
 /* USER CODE END 4 */
 
 /**

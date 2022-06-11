@@ -25,7 +25,7 @@ public:
      */
     virtual void deactivate();
 
-    virtual uint8_t* getTouchScreenCoordinates();
+    virtual bool getCircleXY(int32_t& x, int32_t& y);
 
     virtual ~MotorControlScreenPresenter() {};
 

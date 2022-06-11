@@ -44,138 +44,110 @@ nRF24_TXResult tx_res;
 void radio_Init()
 {
 
-	UART_SendStr("\r\nSTM32L432KC is online.\r\n");
+	 UART_SendStr("\r\nSTM32F303RE is online.\r\n");
 
-//	__disable_irq();
-		// RX/TX disabled
-		nRF24_CE_L();
-//	__enable_irq();
-		Delay_ms(50);
-		// Configure the nRF24L01+
-		UART_SendStr("nRF24L01+ check: ");
+	// RX/TX disabled
+	nRF24_CE_L();
 
-//		if (!nRF24_Check()) {
-//			UART_SendStr("FAIL\r\n");
-//			while (1) {
-//				Toggle_LED();
-//				Delay_ms(50);
-//			}
-//		}
+	// Configure the nRF24L01+
+	UART_SendStr("nRF24L01+ check: ");
 
-		UART_SendStr("OK\r\n");
+	if (!nRF24_Check()) {
+		UART_SendStr("FAIL\r\n");
+		while (1) {
+			Toggle_LED();
+			Delay_ms(50);
+		}
+	}
 
-		// Initialize the nRF24L01 to its default state
-		nRF24_Init();
-		// This is simple transmitter with Enhanced ShockBurst (to one logic address):
-		//   - TX address: 'ESB'
-		//   - payload: 10 bytes
-		//   - RF channel: 40 (2440MHz)
-		//   - data rate: 2Mbps
-		//   - CRC scheme: 2 byte
+	UART_SendStr("OK\r\n");
 
-	    // The transmitter sends a 10-byte packets to the address 'ESB' with Auto-ACK (ShockBurst enabled)
+	// Initialize the nRF24L01 to its default state
+	nRF24_Init();
+	// This is simple receiver with Enhanced ShockBurst:
+	//   - RX address: 'ESB'
+	//   - payload: 10 bytes
+	//   - RF channel: 40 (2440MHz)
+	//   - data rate: 2Mbps
+	//   - CRC scheme: 2 byte
 
-	    // Set RF channel
-	    nRF24_SetRFChannel(40);
+	// The transmitter sends a 10-byte packets to the address 'ESB' with Auto-ACK (ShockBurst enabled)
 
-	    // Set data rate
-	    nRF24_SetDataRate(nRF24_DR_2Mbps);
+	// Set RF channel
+	nRF24_SetRFChannel(40);
 
-	    // Set CRC scheme
-	    nRF24_SetCRCScheme(nRF24_CRC_2byte);
+	// Set data rate
+	nRF24_SetDataRate(nRF24_DR_2Mbps);
 
-	    // Set address width, its common for all pipes (RX and TX)
-	    nRF24_SetAddrWidth(3);
+	// Set CRC scheme
+	nRF24_SetCRCScheme(nRF24_CRC_2byte);
 
-	    // Configure TX PIPE
-	    static const uint8_t nRF24_ADDR[] = { 'E', 'S', 'B' };
-	    nRF24_SetAddr(nRF24_PIPETX, nRF24_ADDR); // program TX address
-	    nRF24_SetAddr(nRF24_PIPE0, nRF24_ADDR); // program address for pipe#0, must be same as TX (for Auto-ACK)
+	// Set address width, its common for all pipes (RX and TX)
+	nRF24_SetAddrWidth(3);
 
-	    // Set TX power (maximum)
-	    nRF24_SetTXPower(nRF24_TXPWR_0dBm);
+	// Configure RX PIPE
+	static const uint8_t nRF24_ADDR[] = {'E', 'S', 'B'};
+	nRF24_SetAddr(nRF24_PIPE1, nRF24_ADDR); // program address for pipe
+	nRF24_SetRXPipe(nRF24_PIPE1, nRF24_AA_ON, 10); // Auto-ACK: enabled, payload length: 10 bytes
 
-	    // Configure auto retransmit: 10 retransmissions with pause of 2500s in between
-	    nRF24_SetAutoRetr(nRF24_ARD_2500us, 10);
+	// Set TX power for Auto-ACK (maximum, to ensure that transmitter will hear ACK reply)
+	nRF24_SetTXPower(nRF24_TXPWR_0dBm);
 
-	    // Enable Auto-ACK for pipe#0 (for ACK packets)
-	    nRF24_EnableAA(nRF24_PIPE0);
+	// Set operational mode (PRX == receiver)
+	nRF24_SetOperationalMode(nRF24_MODE_RX);
 
-	    // Set operational mode (PTX == transmitter)
-	    nRF24_SetOperationalMode(nRF24_MODE_TX);
+	// Clear any pending IRQ flags
+	nRF24_ClearIRQFlags();
 
-	    // Clear any pending IRQ flags
-	    nRF24_ClearIRQFlags();
+	// Wake the transceiver
+	nRF24_SetPowerMode(nRF24_PWR_UP);
 
-	    // Enable DPL
-	    nRF24_SetDynamicPayloadLength(nRF24_DPL_ON);
-		nRF24_SetPayloadWithAck(1);
+	// Enable DPL
+	nRF24_SetDynamicPayloadLength(nRF24_DPL_ON);
+
+	nRF24_SetPayloadWithAck(1);
 
 
-		// Wake the transceiver
-	    nRF24_SetPowerMode(nRF24_PWR_UP);
+		// Put the transceiver to the RX mode
+	nRF24_CE_H();
 
 
 }
 
-void radio_Process(uint8_t* dataToSend, uint8_t dataByteSize)
+void radio_Process_Rx()
 {
 
-	// Some variables
-	uint32_t packets_lost = 0; // global counter of lost packets
-	uint8_t otx;
-	uint8_t otx_plos_cnt; // lost packet count
-	uint8_t otx_arc_cnt; // retransmit count
+	 //
+	// Constantly poll the status of the RX FIFO and get a payload if FIFO is not empty
+	//
+	// This is far from best solution, but it's ok for testing purposes
+	// More smart way is to use the IRQ pin :)
+	//
+	do
+	{
+		// Get a payload from the transceiver
+		pipe = nRF24_ReadPayloadDpl(nRF24_payload, &payload_length);
+		if(payload_length > 0) {
+			nRF24_WriteAckPayload(pipe, "aCk PaYlOaD",11);
+		}
 
+		// Clear all pending IRQ flags
+		nRF24_ClearIRQFlags();
 
-	// The main loop
-	j = 0;
-	payload_length = (uint8_t)(2 + (j + j /10)% 7);
+		// Print a payload contents to UART
+		int16_t* coordinates = nRF24_payload;
+		UART_SendStr("RCV PIPE#");
+		UART_SendInt(pipe);
+		UART_SendStr(" PAYLOAD:>");
+		Toggle_LED();
+		UART_SendBufHex((char *) nRF24_payload, payload_length);
+		UART_SendStr("x: ");
+		UART_SendInt16(coordinates[0]);
+		UART_SendStr(", y: ");
+		UART_SendInt16(coordinates[1]);
+		UART_SendStr("\r\n");
 
-	// Prepare data packet
-	for (i = 0; i < payload_length; i++) {
-		nRF24_payload[i] = (uint8_t) 5/*j++*/;
-		if (j > 0x000000FF) j = 0;
-	}
-
-	// Print a payload
-	UART_SendStr("PAYLOAD:>");
-	UART_SendBufHex((char *)nRF24_payload, payload_length);
-	UART_SendStr("< ... TX: ");
-
-	// Transmit a packet
-	tx_res = radio_TransmitPacket(nRF24_payload, payload_length);
-	otx = nRF24_GetRetransmitCounters();
-	nRF24_ReadPayloadDpl(nRF24_payload, &payload_length );
-	otx_plos_cnt = (otx & nRF24_MASK_PLOS_CNT) >> 4; // packets lost counter
-	otx_arc_cnt  = (otx & nRF24_MASK_ARC_CNT); // auto retransmissions counter
-	switch (tx_res) {
-		case nRF24_TX_SUCCESS:
-			UART_SendStr("OK");
-			break;
-		case nRF24_TX_TIMEOUT:
-			UART_SendStr("TIMEOUT");
-			break;
-		case nRF24_TX_MAXRT:
-			UART_SendStr("MAX RETRANSMIT");
-			packets_lost += otx_plos_cnt;
-			nRF24_ResetPLOS();
-			break;
-		default:
-			UART_SendStr("ERROR");
-			break;
-	}
-	UART_SendStr("   ACK_PAYLOAD=>");
-	UART_SendBufHex((char *) nRF24_payload, payload_length);
-	UART_SendStr("<   ARC=");
-	UART_SendInt(otx_arc_cnt);
-	UART_SendStr(" LOST=");
-	UART_SendInt(packets_lost);
-	UART_SendStr("\r\n");
-
-//    	// Wait ~0.5s
-//    	Delay_ms(500);
-//		Toggle_LED();
+	} while (nRF24_GetStatus_RXFIFO() != nRF24_STATUS_RXFIFO_EMPTY);
 
 }
 
@@ -269,6 +241,18 @@ void UART_SendHex8(uint16_t num)
 void UART_SendInt(int32_t num)
 {
 	char str[10]; // 10 chars max for INT32_MAX
+	int i = 0;
+	if (num < 0) {
+		UART_SendChar('-');
+		num *= -1;
+	}
+	do str[i++] = (char) (num % 10 + '0'); while ((num /= 10) > 0);
+	for (i--; i >= 0; i--) UART_SendChar(str[i]);
+}
+
+void UART_SendInt16(int16_t num)
+{
+	char str[5]; // 5 chars max for INT16_MAX
 	int i = 0;
 	if (num < 0) {
 		UART_SendChar('-');

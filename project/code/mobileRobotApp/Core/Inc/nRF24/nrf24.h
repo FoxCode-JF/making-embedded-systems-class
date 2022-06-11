@@ -217,7 +217,8 @@ static const uint8_t nRF24_ADDR_REGS[7] = {
 // Function prototypes
 void nRF24_Init(void);
 uint8_t nRF24_Check(void);
-void nRF24_IrqHandler(void);
+void nRF24_IRQ_Handler(void);
+void nRF24_Event(void);
 
 void nRF24_SetPowerMode(uint8_t mode);
 void nRF24_SetOperationalMode(uint8_t mode);

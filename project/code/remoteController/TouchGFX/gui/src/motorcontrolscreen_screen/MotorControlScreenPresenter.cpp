@@ -22,10 +22,7 @@ void MotorControlScreenPresenter::deactivate()
 
 }
 
-uint8_t* MotorControlScreenPresenter::getTouchScreenCoordinates()
+bool MotorControlScreenPresenter::getCircleXY(int32_t& x, int32_t& y)
 {
-	ts_coordinates[0] = view.getCircleX();
-	ts_coordinates[1] = view.getCircleY();
-
-	return ts_coordinates;
+	return view.getCircleXY(x, y);
 }

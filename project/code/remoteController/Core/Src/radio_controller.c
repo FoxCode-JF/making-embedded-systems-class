@@ -118,7 +118,7 @@ void radio_Init()
 
 }
 
-void radio_Process(uint8_t* dataToSend, uint8_t dataByteSize)
+void radio_Process_Tx(uint8_t* dataToSend, uint8_t dataByteSize)
 {
 
 	// Some variables
@@ -130,17 +130,18 @@ void radio_Process(uint8_t* dataToSend, uint8_t dataByteSize)
 
 	// The main loop
 	j = 0;
-	payload_length = (uint8_t)(2 + (j + j /10)% 7);
+	payload_length = dataByteSize;
 
 	// Prepare data packet
 	for (i = 0; i < payload_length; i++) {
-		nRF24_payload[i] = (uint8_t) 5/*j++*/;
+		nRF24_payload[i] = dataToSend[i];
 		if (j > 0x000000FF) j = 0;
 	}
 
 	// Print a payload
 	UART_SendStr("PAYLOAD:>");
-	UART_SendBufHex((char *)nRF24_payload, payload_length);
+//	UART_SendBufHex((char *)nRF24_payload, payload_length);
+	UART_SendInt16(((uint16_t*) nRF24_payload)[0]);
 	UART_SendStr("< ... TX: ");
 
 	// Transmit a packet
@@ -269,6 +270,18 @@ void UART_SendHex8(uint16_t num)
 void UART_SendInt(int32_t num)
 {
 	char str[10]; // 10 chars max for INT32_MAX
+	int i = 0;
+	if (num < 0) {
+		UART_SendChar('-');
+		num *= -1;
+	}
+	do str[i++] = (char) (num % 10 + '0'); while ((num /= 10) > 0);
+	for (i--; i >= 0; i--) UART_SendChar(str[i]);
+}
+
+void UART_SendInt16(int16_t num)
+{
+	char str[5]; // 5 chars max for INT16_MAX
 	int i = 0;
 	if (num < 0) {
 		UART_SendChar('-');
